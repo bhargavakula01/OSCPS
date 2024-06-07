@@ -2,6 +2,9 @@ import tkinter as tk
 from tkinter import ttk
 import numpy as np
 
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
 class ChemicalProcessSimulator:
     def __init__(self, root):
         self.root = root
@@ -16,7 +19,11 @@ class ChemicalProcessSimulator:
         
         # Create text widget to display results
         self.result_text = tk.Text(root, height=10, width=50)
-        self.result_text.grid(row=5, column=0, columnspan=3, pady=10)
+        self.result_text.grid(row=5, column=0, columnspan=2, pady=10)
+
+        # Create a frame for the plot
+        self.plot_frame = ttk.Frame(root)
+        self.plot_frame.grid(row=5, column=2, columnspan=2, pady=10)
 
     def create_input_fields(self):
         ttk.Label(self.root, text="Initial Concentration of A [A0] (mol/L)").grid(row=0, column=0, padx=10, pady=5, sticky=tk.W)
@@ -59,6 +66,32 @@ class ChemicalProcessSimulator:
         self.result_text.insert(tk.END, f"Time (s)\tConcentration of A (mol/L)\n")
         for time, conc in zip(t, A_t):
             self.result_text.insert(tk.END, f"{time:.2f}\t\t{conc:.4f}\n")
+
+        # Plot results
+        self.plot_results(t, A_t)
+
+    def plot_results(self, t, A_t):
+        # Clear the previous plot
+        for widget in self.plot_frame.winfo_children():
+            widget.destroy()
+
+        # Create a figure and axis
+        fig, ax = plt.subplots(figsize=(5, 4), dpi=100)
+        ax.plot(t, A_t, label='[A](t)')
+
+        # Add labels and title
+        ax.set_xlabel('Time (s)')
+        ax.set_ylabel('Concentration of A (mol/L)')
+        ax.set_title('First-Order Reaction Kinetics')
+        ax.legend()
+
+        # Create a canvas and add the figure to it
+        canvas = FigureCanvasTkAgg(fig, master=self.plot_frame)
+        canvas.draw()
+        canvas.get_tk_widget().pack()
+       
+    def show_message(self, message):
+        messagebox.showinfo("Information", message)
 
 # Create the main window
 root = tk.Tk()
